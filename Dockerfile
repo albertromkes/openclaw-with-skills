@@ -1,5 +1,10 @@
+# Declare ARG before FROM
 ARG OPENCLAW_VERSION=2026.2.14
+
 FROM ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION}
+
+# Re-declare ARG after FROM (required for later use)
+ARG OPENCLAW_VERSION
 
 USER root
 
@@ -7,7 +12,6 @@ RUN apt-get update && \
     apt-get install -y curl git build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Homebrew for node user (uid 568)
 USER 568
 ENV HOME=/home/node
 
