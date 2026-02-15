@@ -27,8 +27,8 @@ jobs:
       - name: Extract version
         id: version
         run: |
-          VERSION=$(grep OPENCLAW_VERSION Dockerfile | cut -d= -f2)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION=$(awk -F= '/^ARG OPENCLAW_VERSION=/{print $2; exit}' Dockerfile)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v5
