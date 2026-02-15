@@ -1,0 +1,12 @@
+{
+  "dockerfile": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/openclaw/openclaw"],
+      "groupName": "openclaw"
+    }
+  ]
+}
