@@ -17,24 +17,59 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Extract OpenClaw version
+        id: version
+        run: |
+          VERSION=$(awk -F= '/^ARG OPENCLAW_VERSION=/{print $2; exit}' Dockerfile)
+          echo "openclaw_version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # 🔥 Determine next custom version
+      - name: Determine next custom version
+        id: custom
+        if: github.event_name != 'pull_request'
+        run: |
+          OPENCLAW_VERSION=${{ steps.version.outputs.openclaw_version }}
+
+          EXISTING=$(gh api \
+            /users/albertromkes/packages/container/openclaw-with-skills/versions \
+            --jq '.[].metadata.container.tags[]' 2>/dev/null || true)
+
+          MATCHING=$(echo "$EXISTING" | grep "^${OPENCLAW_VERSION}-" || true)
+
+          if [ -z "$MATCHING" ]; then
+            NEXT=1
+          else
+            MAX=$(echo "$MATCHING" | sed "s/${OPENCLAW_VERSION}-//" | sort -nr | head -n1)
+            NEXT=$((MAX+1))
+          fi
+
+          echo "custom_version=$NEXT" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set final tag
+        id: tag
+        if: github.event_name != 'pull_request'
+        run: |
+          FULL_TAG=${{ steps.version.outputs.openclaw_version }}-${{ steps.custom.outputs.custom_version }}
+          echo "full_tag=$FULL_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Login to GHCR
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version
-        id: version
-        run: |
-          VERSION=$(awk -F= '/^ARG OPENCLAW_VERSION=/{print $2; exit}' Dockerfile)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/albertromkes/openclaw-with-skills:${{ steps.version.outputs.version }}
+            ghcr.io/albertromkes/openclaw-with-skills:${{ github.event_name == 'pull_request' && steps.version.outputs.openclaw_version || steps.tag.outputs.full_tag }}
             ghcr.io/albertromkes/openclaw-with-skills:latest
+          build-args: |
+            OPENCLAW_VERSION=${{ steps.version.outputs.openclaw_version }}
+            CUSTOM_VERSION=${{ steps.custom.outputs.custom_version }}
