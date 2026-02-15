@@ -3,7 +3,7 @@ FROM ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION}
 
 USER root
 
-# Install required dependencies for Linuxbrew
+# Install dependencies required for Homebrew
 RUN apt-get update && \
     apt-get install -y \
       build-essential \
@@ -14,11 +14,15 @@ RUN apt-get update && \
       procps \
     && rm -rf /var/lib/apt/lists/*
 
+# Ensure node home exists and is writable
+RUN mkdir -p /home/node/.linuxbrew && \
+    chown -R 568:568 /home/node
+
 # Switch to OpenClaw user
 USER 568
 ENV HOME=/home/node
 
-# Install Homebrew manually (no interactive script)
+# Install Homebrew manually (no installer script)
 RUN git clone https://github.com/Homebrew/brew $HOME/.linuxbrew/Homebrew && \
     mkdir -p $HOME/.linuxbrew/bin && \
     ln -s $HOME/.linuxbrew/Homebrew/bin/brew $HOME/.linuxbrew/bin/brew
@@ -26,7 +30,7 @@ RUN git clone https://github.com/Homebrew/brew $HOME/.linuxbrew/Homebrew && \
 # Add brew to PATH
 ENV PATH="/home/node/.linuxbrew/bin:/home/node/.linuxbrew/sbin:${PATH}"
 
-# Verify brew works
+# Verify
 RUN brew --version
 
 WORKDIR /app
