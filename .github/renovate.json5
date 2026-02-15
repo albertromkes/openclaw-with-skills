@@ -9,5 +9,6 @@
       "matchPackageNames": ["ghcr.io/openclaw/openclaw"],
       "groupName": "openclaw"
     }
-  ]
+  ],
+  "dependencyDashboard": true
 }
