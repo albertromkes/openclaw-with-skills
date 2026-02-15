@@ -36,5 +36,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/<your-user>/openclaw-with-skills:${{ steps.version.outputs.version }}
-            ghcr.io/<your-user>/openclaw-with-skills:latest
+            ghcr.io/albertromkes/openclaw-with-skills:${{ steps.version.outputs.version }}
+            ghcr.io/albertromkes/openclaw-with-skills:latest
