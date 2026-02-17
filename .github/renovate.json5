@@ -1,14 +1,20 @@
 {
-  "extends": ["config:base"],
-  "dockerfile": {
-    "enabled": true
-  },
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/openclaw/openclaw"],
-      "groupName": "openclaw"
-    }
+  extends: [
+    'config:recommended',
   ],
-  "dependencyDashboard": true
+  dockerfile: {
+    enabled: true,
+  },
+  packageRules: [
+    {
+      matchDatasources: [
+        'docker',
+      ],
+      matchPackageNames: [
+        'ghcr.io/openclaw/openclaw',
+      ],
+      groupName: 'openclaw',
+    },
+  ],
+  dependencyDashboard: true,
 }
